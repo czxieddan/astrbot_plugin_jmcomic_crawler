@@ -1,39 +1,23 @@
 from __future__ import annotations
 
-from astrbot.api import logger
 from astrbot.api.event import AstrMessageEvent, filter
 from astrbot.api.star import Context, Star, register
 
 from .services.plugin_application import PluginApplication
+from .services.plugin_runtime import handle_plugin_request, read_plugin_config
 
 
 @register(
     "astrbot_plugin_jmcomic_crawler",
     "CzXieDdan",
     "通过 LLM 自然语言调用查询 JMComic 元数据、评论、总结、推荐与下载任务，并支持配置池轮询、依赖自检、公共 API 对外复用。",
-    "0.3.1",
+    "0.3.2",
 )
 class JMComicCrawlerPlugin(Star):
     def __init__(self, context: Context, config: dict | None = None):
         super().__init__(context)
-        self.config = config if isinstance(config, dict) else self._read_plugin_config()
+        self.config = config if isinstance(config, dict) else read_plugin_config(self)
         self.app = PluginApplication(self.config, context)
-
-    def _read_plugin_config(self) -> dict:
-        for attr in ("config", "plugin_config"):
-            value = getattr(self, attr, None)
-            if isinstance(value, dict):
-                return value
-        for attr in ("get_config", "load_config"):
-            fn = getattr(self, attr, None)
-            if callable(fn):
-                try:
-                    value = fn()
-                    if isinstance(value, dict):
-                        return value
-                except Exception as exc:
-                    logger.warning("读取插件配置失败: %s", exc)
-        return {}
 
     def get_public_api(self):
         return self.app.public_api_service
@@ -47,18 +31,14 @@ class JMComicCrawlerPlugin(Star):
         chapter_id: str = "",
         **kwargs,
     ) -> str:
-        actual_goal = (goal or message or kwargs.get("query") or kwargs.get("text") or "").strip()
-        if not actual_goal:
-            return "请描述你想执行的 JMComic 操作，例如：搜索本子、查看详情、读取评论、总结、推荐或下载。"
-
-        if event is None:
-            return f"已接收 JMComic 请求：{actual_goal}"
-
-        return await self.app.workflow_service.run(
-            event,
-            actual_goal,
-            album_id or None,
-            chapter_id or None,
+        return await handle_plugin_request(
+            self.app,
+            event=event,
+            message=message,
+            goal=goal,
+            album_id=album_id,
+            chapter_id=chapter_id,
+            **kwargs,
         )
 
     @filter.command("jm")

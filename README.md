@@ -1,6 +1,6 @@
 <div align="center">
 <a href="https://github.com/czxieddan/astrbot_plugin_jmcomic_crawler/">
-  <img src="logo.png" height="200" alt="JMComic Crawler Logo">
+  <img src="https://github.com/czxieddan/astrbot_plugin_jmcomic_crawler/raw/main/logo.png" height="200" alt="JMComic Crawler Logo">
 </a>
 <h1>JMComic互动抓取器 - CzXieDdan</h1>
 <p><strong>面向 AstrBot 的 JMComic 数据交互与下载插件</strong><br>
@@ -438,7 +438,7 @@ data/config/dependency_state.json
 <div align="center">
   <h3>👥 Contributors</h3>
   <a href="https://github.com/czxieddan/astrbot_plugin_jmcomic_crawler/graphs/contributors">
-    <img src="https://stg.contrib.rocks/image?repo=czxieddan/astrbot_plugin_jmcomic_crawler" alt="Contributors" />
+    <img src="https://stg.contrib.rocks/image?repo=czxieddan/astrbot_plugin_jmcomic_crawler" />
   </a>
 </div>
 
