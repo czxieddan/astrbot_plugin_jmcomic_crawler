@@ -1,211 +1,172 @@
 {
-  "type": "object",
-  "title": "JMComic 插件配置",
-  "properties": {
-    "enabled": {
-      "type": "boolean",
-      "title": "启用插件",
-      "default": true
-    },
-    "jm_username": {
-      "type": "string",
-      "title": "兼容旧版单用户名配置",
-      "default": ""
-    },
-    "jm_password": {
-      "type": "string",
-      "title": "兼容旧版单密码配置",
-      "default": ""
-    },
-    "domain": {
-      "type": "string",
-      "title": "兼容旧版单域名配置",
-      "default": ""
-    },
-    "proxies": {
-      "type": "string",
-      "title": "兼容旧版单代理配置",
-      "description": "例如 http://127.0.0.1:7890",
-      "default": ""
-    },
-    "jm_usernames": {
-      "type": "array",
-      "title": "JM 用户名池",
-      "items": {
-        "type": "string"
-      },
-      "default": []
-    },
-    "jm_passwords": {
-      "type": "array",
-      "title": "JM 密码池",
-      "items": {
-        "type": "string"
-      },
-      "default": []
-    },
-    "jm_domains": {
-      "type": "array",
-      "title": "JM 域名池",
-      "items": {
-        "type": "string"
-      },
-      "default": []
-    },
-    "proxy_pool": {
-      "type": "array",
-      "title": "代理池",
-      "items": {
-        "type": "string"
-      },
-      "default": []
-    },
-    "max_search_results": {
-      "type": "integer",
-      "title": "搜索结果最大返回条数",
-      "default": 5,
-      "minimum": 1,
-      "maximum": 20
-    },
-    "dependency_check_on_startup": {
-      "type": "boolean",
-      "title": "启动时检查依赖",
-      "default": true
-    },
-    "auto_install_dependencies": {
-      "type": "boolean",
-      "title": "缺失依赖时自动安装",
-      "default": true
-    },
-    "dependency_install_timeout_seconds": {
-      "type": "integer",
-      "title": "依赖安装超时时间（秒）",
-      "default": 300,
-      "minimum": 30,
-      "maximum": 1800
-    },
-    "cache_enabled": {
-      "type": "boolean",
-      "title": "启用缓存",
-      "default": true
-    },
-    "cache_ttl_seconds": {
-      "type": "integer",
-      "title": "缓存时间（秒）",
-      "default": 300,
-      "minimum": 0
-    },
-    "memory_enabled": {
-      "type": "boolean",
-      "title": "启用会话上下文记忆",
-      "default": true
-    },
-    "memory_ttl_seconds": {
-      "type": "integer",
-      "title": "上下文记忆保留时长（秒）",
-      "default": 3600,
-      "minimum": 60
-    },
-    "nsfw_notice": {
-      "type": "boolean",
-      "title": "返回结果前附加 NSFW 提示",
-      "default": true
-    },
-    "download_root_dir": {
-      "type": "string",
-      "title": "下载根目录",
-      "default": "data/downloads"
-    },
-    "download_zip_by_default": {
-      "type": "boolean",
-      "title": "下载任务默认生成 zip",
-      "default": false
-    },
-    "max_concurrent_downloads": {
-      "type": "integer",
-      "title": "最大并发下载任务数",
-      "default": 2,
-      "minimum": 1,
-      "maximum": 10
-    },
-    "download_retry_count": {
-      "type": "integer",
-      "title": "下载重试次数",
-      "default": 2,
-      "minimum": 1,
-      "maximum": 10
-    },
-    "download_timeout_seconds": {
-      "type": "integer",
-      "title": "下载超时时间（秒）",
-      "default": 60,
-      "minimum": 10,
-      "maximum": 600
-    },
-    "admin_only_download": {
-      "type": "boolean",
-      "title": "仅管理员可下载/取消任务",
-      "default": true
-    },
-    "admin_users": {
-      "type": "array",
-      "title": "管理员用户列表",
-      "items": {
-        "type": "string"
-      },
-      "default": []
-    },
-    "comments_enabled": {
-      "type": "boolean",
-      "title": "启用评论抓取",
-      "default": true
-    },
-    "summary_enabled": {
-      "type": "boolean",
-      "title": "启用内容/评论总结",
-      "default": true
-    },
-    "sentiment_enabled": {
-      "type": "boolean",
-      "title": "启用评论情感分析",
-      "default": true
-    },
-    "recommend_enabled": {
-      "type": "boolean",
-      "title": "启用相似作品推荐",
-      "default": true
-    },
-    "recommend_max_results": {
-      "type": "integer",
-      "title": "推荐结果最大数量",
-      "default": 5,
-      "minimum": 1,
-      "maximum": 20
-    },
-    "workflow_enabled": {
-      "type": "boolean",
-      "title": "启用多步工作流",
-      "default": true
-    },
-    "llm_postprocess_enabled": {
-      "type": "boolean",
-      "title": "启用 LLM 二次润色输出",
-      "default": true
-    },
-    "llm_postprocess_max_chars": {
-      "type": "integer",
-      "title": "LLM 二次润色最大输入长度",
-      "default": 4000,
-      "minimum": 500,
-      "maximum": 20000
-    },
-    "llm_persona_style_prompt": {
-      "type": "string",
-      "title": "LLM 人设风格附加提示词",
-      "default": "请严格延续当前会话模型的人设、语气和表达风格。"
-    }
+  "enabled": {
+    "type": "bool",
+    "description": "启用插件",
+    "default": true
   },
-  "required": [
-    "enabled"
-  ]
+  "jm_username": {
+    "type": "string",
+    "description": "兼容旧版单用户名配置",
+    "default": ""
+  },
+  "jm_password": {
+    "type": "string",
+    "description": "兼容旧版单密码配置",
+    "default": ""
+  },
+  "domain": {
+    "type": "string",
+    "description": "兼容旧版单域名配置",
+    "default": ""
+  },
+  "proxies": {
+    "type": "string",
+    "description": "兼容旧版单代理配置，例如 http://127.0.0.1:7890",
+    "default": ""
+  },
+  "jm_usernames": {
+    "type": "list",
+    "description": "JM 用户名池，建议与 jm_passwords 一一对应",
+    "default": []
+  },
+  "jm_passwords": {
+    "type": "list",
+    "description": "JM 密码池，建议与 jm_usernames 一一对应",
+    "default": []
+  },
+  "jm_domains": {
+    "type": "list",
+    "description": "JM 域名池",
+    "default": []
+  },
+  "proxy_pool": {
+    "type": "list",
+    "description": "代理池",
+    "default": []
+  },
+  "max_search_results": {
+    "type": "int",
+    "description": "搜索结果最大返回条数",
+    "default": 5
+  },
+  "dependency_check_on_startup": {
+    "type": "bool",
+    "description": "启动时检查依赖",
+    "default": true
+  },
+  "auto_install_dependencies": {
+    "type": "bool",
+    "description": "缺失依赖时自动安装",
+    "default": true
+  },
+  "dependency_install_timeout_seconds": {
+    "type": "int",
+    "description": "依赖安装超时时间（秒）",
+    "default": 300
+  },
+  "cache_enabled": {
+    "type": "bool",
+    "description": "启用缓存",
+    "default": true
+  },
+  "cache_ttl_seconds": {
+    "type": "int",
+    "description": "缓存时间（秒）",
+    "default": 300
+  },
+  "memory_enabled": {
+    "type": "bool",
+    "description": "启用会话上下文记忆",
+    "default": true
+  },
+  "memory_ttl_seconds": {
+    "type": "int",
+    "description": "上下文记忆保留时长（秒）",
+    "default": 3600
+  },
+  "nsfw_notice": {
+    "type": "bool",
+    "description": "返回结果前附加 NSFW 提示",
+    "default": true
+  },
+  "download_root_dir": {
+    "type": "string",
+    "description": "下载根目录",
+    "default": "data/downloads"
+  },
+  "download_zip_by_default": {
+    "type": "bool",
+    "description": "下载任务默认生成 zip",
+    "default": false
+  },
+  "max_concurrent_downloads": {
+    "type": "int",
+    "description": "最大并发下载任务数",
+    "default": 2
+  },
+  "download_retry_count": {
+    "type": "int",
+    "description": "下载重试次数",
+    "default": 2
+  },
+  "download_timeout_seconds": {
+    "type": "int",
+    "description": "下载超时时间（秒）",
+    "default": 60
+  },
+  "admin_only_download": {
+    "type": "bool",
+    "description": "仅管理员可下载/取消任务",
+    "default": true
+  },
+  "admin_users": {
+    "type": "list",
+    "description": "管理员用户列表",
+    "default": []
+  },
+  "comments_enabled": {
+    "type": "bool",
+    "description": "启用评论抓取",
+    "default": true
+  },
+  "summary_enabled": {
+    "type": "bool",
+    "description": "启用内容/评论总结",
+    "default": true
+  },
+  "sentiment_enabled": {
+    "type": "bool",
+    "description": "启用评论情感分析",
+    "default": true
+  },
+  "recommend_enabled": {
+    "type": "bool",
+    "description": "启用相似作品推荐",
+    "default": true
+  },
+  "recommend_max_results": {
+    "type": "int",
+    "description": "推荐结果最大数量",
+    "default": 5
+  },
+  "workflow_enabled": {
+    "type": "bool",
+    "description": "启用多步工作流",
+    "default": true
+  },
+  "llm_postprocess_enabled": {
+    "type": "bool",
+    "description": "启用 LLM 二次润色输出",
+    "default": true
+  },
+  "llm_postprocess_max_chars": {
+    "type": "int",
+    "description": "LLM 二次润色最大输入长度",
+    "default": 4000
+  },
+  "llm_persona_style_prompt": {
+    "type": "string",
+    "description": "LLM 人设风格附加提示词",
+    "default": "请严格延续当前会话模型的人设、语气和表达风格。"
+  }
 }
