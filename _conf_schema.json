@@ -4,26 +4,6 @@
     "description": "启用插件",
     "default": true
   },
-  "jm_username": {
-    "type": "string",
-    "description": "兼容旧版单用户名配置",
-    "default": ""
-  },
-  "jm_password": {
-    "type": "string",
-    "description": "兼容旧版单密码配置",
-    "default": ""
-  },
-  "domain": {
-    "type": "string",
-    "description": "兼容旧版单域名配置",
-    "default": ""
-  },
-  "proxies": {
-    "type": "string",
-    "description": "兼容旧版单代理配置，例如 http://127.0.0.1:7890",
-    "default": ""
-  },
   "jm_usernames": {
     "type": "list",
     "description": "JM 用户名池，建议与 jm_passwords 一一对应",

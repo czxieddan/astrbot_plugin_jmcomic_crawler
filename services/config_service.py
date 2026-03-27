@@ -30,10 +30,6 @@ class ConfigService:
         "llm_postprocess_enabled": True,
         "llm_postprocess_max_chars": 4000,
         "llm_persona_style_prompt": "请严格延续当前会话模型的人设、语气和表达风格。",
-        "jm_username": "",
-        "jm_password": "",
-        "domain": "",
-        "proxies": "",
         "jm_usernames": [],
         "jm_passwords": [],
         "jm_domains": [],
@@ -52,10 +48,10 @@ class ConfigService:
         merged.update(self.raw_config)
 
         merged["admin_users"] = self._normalize_list(merged.get("admin_users"))
-        merged["jm_usernames"] = self._normalize_list(merged.get("jm_usernames"), merged.get("jm_username"))
-        merged["jm_passwords"] = self._normalize_list(merged.get("jm_passwords"), merged.get("jm_password"))
-        merged["jm_domains"] = self._normalize_list(merged.get("jm_domains"), merged.get("domain"))
-        merged["proxy_pool"] = self._normalize_list(merged.get("proxy_pool"), merged.get("proxies"))
+        merged["jm_usernames"] = self._normalize_list(merged.get("jm_usernames"))
+        merged["jm_passwords"] = self._normalize_list(merged.get("jm_passwords"))
+        merged["jm_domains"] = self._normalize_list(merged.get("jm_domains"))
+        merged["proxy_pool"] = self._normalize_list(merged.get("proxy_pool"))
 
         self._validate_account_pool(merged["jm_usernames"], merged["jm_passwords"])
         merged["account_pool"] = [
@@ -67,15 +63,11 @@ class ConfigService:
         return merged
 
     @staticmethod
-    def _normalize_list(value: Any, legacy_value: Any = None) -> list[str]:
+    def _normalize_list(value: Any) -> list[str]:
         if isinstance(value, list):
             return [str(item).strip() for item in value if str(item).strip()]
         if isinstance(value, str) and value.strip():
             return [item.strip() for item in value.split(",") if item.strip()]
-        if isinstance(legacy_value, list):
-            return [str(item).strip() for item in legacy_value if str(item).strip()]
-        if isinstance(legacy_value, str) and legacy_value.strip():
-            return [legacy_value.strip()]
         return []
 
     @staticmethod
