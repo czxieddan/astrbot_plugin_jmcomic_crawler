@@ -335,7 +335,6 @@ class JMComicService:
         self._set_option_value(option, "proxies", proxy)
         self._set_option_value(option, "proxy", proxy)
         self._set_option_value(option, "domain", domain)
-        self._set_option_value(option, "base_url", domain)
 
         username = account.get("username")
         password = account.get("password")
@@ -393,21 +392,24 @@ class JMComicService:
         if value in (None, "", {}):
             return
 
-        if hasattr(option, key):
-            try:
-                setattr(option, key, value)
-                return
-            except Exception:
-                pass
+        try:
+            setattr(option, key, value)
+            return
+        except Exception:
+            pass
 
         for container_name in ("client", "network", "plugins", "download"):
-            container = getattr(option, container_name, None)
-            if container is not None and hasattr(container, key):
-                try:
-                    setattr(container, key, value)
-                    return
-                except Exception:
-                    continue
+            try:
+                container = getattr(option, container_name, None)
+            except Exception:
+                continue
+            if container is None:
+                continue
+            try:
+                setattr(container, key, value)
+                return
+            except Exception:
+                continue
 
     def _normalize_search_result(self, keyword: str, page: int, raw: Any) -> SearchResult:
         items: list[SearchAlbumItem] = []
