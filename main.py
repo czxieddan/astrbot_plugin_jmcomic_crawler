@@ -11,7 +11,7 @@ from .services.plugin_runtime import handle_plugin_request, read_plugin_config
     "astrbot_plugin_jmcomic_crawler",
     "CzXieDdan",
     "通过 LLM 自然语言调用查询 JMComic 元数据、评论、总结、推荐与下载任务，并支持配置池轮询、依赖自检、公共 API 对外复用。",
-    "0.3.2",
+    "0.3.3",
 )
 class JMComicCrawlerPlugin(Star):
     def __init__(self, context: Context, config: dict | None = None):

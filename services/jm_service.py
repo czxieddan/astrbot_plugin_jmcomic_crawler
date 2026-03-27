@@ -67,6 +67,12 @@ class JMComicService:
             invoke_kwargs={"page": page},
             normalize=lambda raw: self._normalize_search_result(keyword, page, raw),
             action_name="搜索接口",
+            invoker=lambda client, candidates, args, kwargs: self._invoke_search_candidates(
+                client,
+                candidates,
+                keyword=keyword,
+                page=page,
+            ),
         )
 
     def _get_album_detail_sync(self, album_id: str) -> AlbumDetail:
@@ -94,6 +100,7 @@ class JMComicService:
         invoke_kwargs: dict,
         normalize,
         action_name: str,
+        invoker=None,
     ):
         jmcomic = self._load_module()
         attempts = self._max_attempts()
@@ -103,7 +110,11 @@ class JMComicService:
             bundle = self._current_bundle()
             client = self._init_client(jmcomic, bundle)
             try:
-                raw = self._invoke_candidates(client, fn_candidates, invoke_args, invoke_kwargs)
+                raw = (
+                    invoker(client, fn_candidates, invoke_args, invoke_kwargs)
+                    if callable(invoker)
+                    else self._invoke_candidates(client, fn_candidates, invoke_args, invoke_kwargs)
+                )
                 if self.pool_service:
                     self.pool_service.mark_success()
                 return normalize(raw)
@@ -136,6 +147,61 @@ class JMComicService:
         if last_error is not None:
             raise last_error
         raise JMQueryError("未找到可用方法")
+
+    def _invoke_search_candidates(
+        self,
+        client,
+        fn_candidates: tuple[str, ...],
+        keyword: str,
+        page: int,
+    ):
+        last_error = None
+        main_tag = self.config.get("jm_search_main_tag", "") or ""
+        order_by = self.config.get("jm_search_order_by", "") or ""
+        time_filter = self.config.get("jm_search_time", "") or ""
+        category = self.config.get("jm_search_category", "") or ""
+        sub_category = self.config.get("jm_search_sub_category", "") or ""
+
+        for name in fn_candidates:
+            fn = getattr(client, name, None)
+            if not callable(fn):
+                continue
+
+            attempts = (
+                lambda: fn(keyword, page=page),
+                lambda: fn(keyword, page),
+                lambda: fn(
+                    keyword,
+                    page,
+                    main_tag,
+                    order_by,
+                    time_filter,
+                    category,
+                    sub_category,
+                ),
+                lambda: fn(
+                    search_query=keyword,
+                    page=page,
+                    main_tag=main_tag,
+                    order_by=order_by,
+                    time=time_filter,
+                    category=category,
+                    sub_category=sub_category,
+                ),
+            )
+
+            for attempt in attempts:
+                try:
+                    return attempt()
+                except TypeError as exc:
+                    last_error = exc
+                except Exception as exc:
+                    last_error = exc
+                    break
+
+        if last_error is not None:
+            raise last_error
+        raise JMQueryError("未找到可用搜索方法")
 
     def _init_client(self, jmcomic, bundle: dict[str, Any]):
         bundle_key = self._bundle_identity(bundle)
