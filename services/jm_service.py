@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import inspect
 from typing import Any, Iterable, Optional
 
 from ..models.dto import (
@@ -127,7 +128,10 @@ class JMComicService:
                 else:
                     break
 
-        raise JMQueryError(f"未能调用 jmcomic {action_name}: {last_error or '未找到可用方法'}")
+        error_text = "未找到可用方法"
+        if last_error is not None:
+            error_text = str(last_error).strip() or repr(last_error)
+        raise JMQueryError(f"未能调用 jmcomic {action_name}: {error_text}")
 
     def _invoke_candidates(self, client, fn_candidates: tuple[str, ...], invoke_args: tuple, invoke_kwargs: dict):
         last_error = None
@@ -167,41 +171,118 @@ class JMComicService:
             if not callable(fn):
                 continue
 
-            attempts = (
-                lambda: fn(keyword, page=page),
-                lambda: fn(keyword, page),
-                lambda: fn(
-                    keyword,
-                    page,
-                    main_tag,
-                    order_by,
-                    time_filter,
-                    category,
-                    sub_category,
-                ),
-                lambda: fn(
-                    search_query=keyword,
-                    page=page,
-                    main_tag=main_tag,
-                    order_by=order_by,
-                    time=time_filter,
-                    category=category,
-                    sub_category=sub_category,
-                ),
+            try:
+                signature = inspect.signature(fn)
+            except Exception:
+                signature = None
+
+            dynamic_attempt = self._build_search_attempt(
+                fn,
+                signature,
+                keyword,
+                page,
+                main_tag,
+                order_by,
+                time_filter,
+                category,
+                sub_category,
+            )
+            attempts = [dynamic_attempt] if dynamic_attempt is not None else []
+            attempts.extend(
+                [
+                    lambda: fn(keyword, page=page),
+                    lambda: fn(keyword, page),
+                    lambda: fn(
+                        keyword,
+                        page,
+                        main_tag,
+                        order_by,
+                        time_filter,
+                        category,
+                        sub_category,
+                    ),
+                    lambda: fn(
+                        search_query=keyword,
+                        page=page,
+                        main_tag=main_tag,
+                        order_by=order_by,
+                        time=time_filter,
+                        category=category,
+                        sub_category=sub_category,
+                    ),
+                ]
             )
 
             for attempt in attempts:
                 try:
                     return attempt()
                 except TypeError as exc:
-                    last_error = exc
+                    detail = f"method={name}"
+                    if signature is not None:
+                        detail += f", signature={signature}"
+                    last_error = TypeError(f"{detail}, error={repr(exc)}")
                 except Exception as exc:
-                    last_error = exc
+                    detail = f"method={name}"
+                    if signature is not None:
+                        detail += f", signature={signature}"
+                    last_error = RuntimeError(f"{detail}, error={repr(exc)}")
                     break
 
         if last_error is not None:
             raise last_error
         raise JMQueryError("未找到可用搜索方法")
+
+    @staticmethod
+    def _build_search_attempt(
+        fn,
+        signature,
+        keyword: str,
+        page: int,
+        main_tag: str,
+        order_by: str,
+        time_filter: str,
+        category: str,
+        sub_category: str,
+    ):
+        if signature is None:
+            return None
+
+        keyword_keys = ("search_query", "query", "keyword", "search_keyword", "text")
+        mapping = {
+            "page": page,
+            "main_tag": main_tag,
+            "order_by": order_by,
+            "time": time_filter,
+            "category": category,
+            "sub_category": sub_category,
+        }
+
+        params = list(signature.parameters.values())
+        kwargs = {}
+        positional = []
+
+        for param in params:
+            if param.kind in (inspect.Parameter.VAR_POSITIONAL, inspect.Parameter.VAR_KEYWORD):
+                continue
+
+            if param.name in keyword_keys:
+                if param.kind in (inspect.Parameter.POSITIONAL_ONLY, inspect.Parameter.POSITIONAL_OR_KEYWORD):
+                    positional.append(keyword)
+                else:
+                    kwargs[param.name] = keyword
+                continue
+
+            if param.name in mapping:
+                value = mapping[param.name]
+                if param.kind in (inspect.Parameter.POSITIONAL_ONLY, inspect.Parameter.POSITIONAL_OR_KEYWORD):
+                    positional.append(value)
+                else:
+                    kwargs[param.name] = value
+
+        if not positional and not kwargs:
+            return None
+
+        return lambda: fn(*positional, **kwargs)
 
     def _init_client(self, jmcomic, bundle: dict[str, Any]):
         bundle_key = self._bundle_identity(bundle)
