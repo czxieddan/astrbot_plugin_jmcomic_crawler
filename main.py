@@ -14,9 +14,9 @@ from .services.plugin_application import PluginApplication
     "0.3.1",
 )
 class JMComicCrawlerPlugin(Star):
-    def __init__(self, context: Context):
+    def __init__(self, context: Context, config: dict | None = None):
         super().__init__(context)
-        self.config = self._read_plugin_config()
+        self.config = config if isinstance(config, dict) else self._read_plugin_config()
         self.app = PluginApplication(self.config, context)
         self._register_llm_tools()
 

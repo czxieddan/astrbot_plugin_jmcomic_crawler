@@ -37,11 +37,12 @@ class PluginApplication:
         self.config = self.config_service.get_config()
         self.context = context
 
-        data_dir = Path("data")
+        plugin_root = Path(__file__).resolve().parent.parent
+        data_dir = plugin_root / "data"
         data_dir.mkdir(parents=True, exist_ok=True)
 
         self.dependency_service = DependencyService(
-            project_root=".",
+            project_root=str(plugin_root),
             data_dir=str(data_dir),
             auto_install=bool(self.config.get("auto_install_dependencies", True)),
             check_on_startup=bool(self.config.get("dependency_check_on_startup", True)),
