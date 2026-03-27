@@ -32,7 +32,8 @@ class ConfigService:
         "llm_persona_style_prompt": "请严格延续当前会话模型的人设、语气和表达风格。",
         "jm_usernames": [],
         "jm_passwords": [],
-        "jm_domains": [],
+        "jm_domain_html": [],
+        "jm_domain_api": [],
         "proxy_pool": [],
     }
 
@@ -50,7 +51,8 @@ class ConfigService:
         merged["admin_users"] = self._normalize_list(merged.get("admin_users"))
         merged["jm_usernames"] = self._normalize_list(merged.get("jm_usernames"))
         merged["jm_passwords"] = self._normalize_list(merged.get("jm_passwords"))
-        merged["jm_domains"] = self._normalize_list(merged.get("jm_domains"))
+        merged["jm_domain_html"] = self._normalize_list(merged.get("jm_domain_html"))
+        merged["jm_domain_api"] = self._normalize_list(merged.get("jm_domain_api"))
         merged["proxy_pool"] = self._normalize_list(merged.get("proxy_pool"))
 
         self._validate_account_pool(merged["jm_usernames"], merged["jm_passwords"])

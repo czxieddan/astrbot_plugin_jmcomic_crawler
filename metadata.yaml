@@ -3,8 +3,8 @@ display_name: JMComic互动抓取器
 desc: 通过 LLM 自然语言调用查询 JMComic 元数据、评论、总结、推荐与下载任务，并支持配置池轮询、依赖自检、公共 API 对外复用。
 author: CzXieDdan
 repo: https://github.com/czxieddan/astrbot_plugin_jmcomic_crawler
-version: 0.3.3
-astrbot_version: ">=4.22.0"
+version: 0.3.4
+astrbot_version: ">=4.22.0,<5"
 tags:
   - jmcomic
   - llm

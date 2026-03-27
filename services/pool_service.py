@@ -10,16 +10,18 @@ class PoolService:
         self.state = self.state_manager.load()
 
         self.account_pool = self._build_account_pool()
-        self.domain_pool = self._normalize_list(self.config.get("jm_domains"), self.config.get("domain"))
-        self.proxy_pool = self._normalize_list(self.config.get("proxy_pool"), self.config.get("proxies"))
+        self.domain_html_pool = self._normalize_list(self.config.get("jm_domain_html"))
+        self.domain_api_pool = self._normalize_list(self.config.get("jm_domain_api"))
+        self.proxy_pool = self._normalize_list(self.config.get("proxy_pool"))
 
     def get_current_bundle(self) -> dict[str, Any]:
         return {
             "account": self._current_account(),
-            "domain": self._current_domain(),
+            "domain": self._current_domain_bundle(),
             "proxy": self._current_proxy(),
             "account_index": self._index("account_index", len(self.account_pool)),
-            "domain_index": self._index("domain_index", len(self.domain_pool)),
+            "domain_html_index": self._index("domain_html_index", len(self.domain_html_pool)),
+            "domain_api_index": self._index("domain_api_index", len(self.domain_api_pool)),
             "proxy_index": self._index("proxy_index", len(self.proxy_pool)),
         }
 
@@ -29,7 +31,8 @@ class PoolService:
 
     def failover(self) -> dict[str, Any]:
         next_state = {
-            "domain_index": self._next_index("domain_index", len(self.domain_pool)),
+            "domain_html_index": self._next_index("domain_html_index", len(self.domain_html_pool)),
+            "domain_api_index": self._next_index("domain_api_index", len(self.domain_api_pool)),
             "proxy_index": self._next_index("proxy_index", len(self.proxy_pool)),
             "account_index": self._next_index("account_index", len(self.account_pool)),
         }
@@ -43,15 +46,15 @@ class PoolService:
         if usernames is None and passwords is None:
             return
 
-        usernames = self._normalize_list(usernames, self.config.get("jm_username"))
-        passwords = self._normalize_list(passwords, self.config.get("jm_password"))
+        usernames = self._normalize_list(usernames)
+        passwords = self._normalize_list(passwords)
         if len(usernames) != len(passwords):
             raise ValueError("jm_usernames 与 jm_passwords 长度不一致，无法一一匹配")
 
     def _build_account_pool(self) -> list[dict[str, str]]:
         self.validate()
-        usernames = self._normalize_list(self.config.get("jm_usernames"), self.config.get("jm_username"))
-        passwords = self._normalize_list(self.config.get("jm_passwords"), self.config.get("jm_password"))
+        usernames = self._normalize_list(self.config.get("jm_usernames"))
+        passwords = self._normalize_list(self.config.get("jm_passwords"))
 
         if not usernames and not passwords:
             return []
@@ -66,15 +69,11 @@ class PoolService:
         return pool
 
     @staticmethod
-    def _normalize_list(new_value: Any, legacy_value: Any = None) -> list[str]:
-        if isinstance(new_value, list):
-            return [str(item).strip() for item in new_value if str(item).strip()]
-        if isinstance(new_value, str):
-            return [item.strip() for item in new_value.split(",") if item.strip()]
-        if isinstance(legacy_value, list):
-            return [str(item).strip() for item in legacy_value if str(item).strip()]
-        if isinstance(legacy_value, str) and legacy_value.strip():
-            return [legacy_value.strip()]
+    def _normalize_list(value: Any) -> list[str]:
+        if isinstance(value, list):
+            return [str(item).strip() for item in value if str(item).strip()]
+        if isinstance(value, str):
+            return [item.strip() for item in value.split(",") if item.strip()]
         return []
 
     def _current_account(self) -> dict[str, str] | None:
@@ -82,10 +81,18 @@ class PoolService:
             return None
         return self.account_pool[self._index("account_index", len(self.account_pool))]
 
-    def _current_domain(self) -> str | None:
-        if not self.domain_pool:
+    def _current_domain_bundle(self) -> dict[str, str] | None:
+        html = None
+        api = None
+
+        if self.domain_html_pool:
+            html = self.domain_html_pool[self._index("domain_html_index", len(self.domain_html_pool))]
+        if self.domain_api_pool:
+            api = self.domain_api_pool[self._index("domain_api_index", len(self.domain_api_pool))]
+
+        if not html and not api:
             return None
-        return self.domain_pool[self._index("domain_index", len(self.domain_pool))]
+        return {"html": html, "api": api}
 
     def _current_proxy(self) -> str | None:
         if not self.proxy_pool:

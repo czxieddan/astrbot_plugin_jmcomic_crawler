@@ -309,9 +309,7 @@ class JMComicService:
             except Exception:
                 continue
 
-        self._client = jmcomic
-        self._bundle_key = bundle_key
-        return self._client
+        raise JMQueryError("未找到可用的 jmcomic 客户端实例")
 
     def _build_option(self, jmcomic, bundle: dict[str, Any]) -> Optional[Any]:
         option = None
@@ -328,13 +326,18 @@ class JMComicService:
         if option is None:
             return None
 
-        domain = bundle.get("domain")
+        domain_bundle = bundle.get("domain") or {}
         proxy = bundle.get("proxy")
         account = bundle.get("account") or {}
 
+        html_domain = domain_bundle.get("html") if isinstance(domain_bundle, dict) else None
+        api_domain = domain_bundle.get("api") if isinstance(domain_bundle, dict) else None
+
         self._set_option_value(option, "proxies", proxy)
         self._set_option_value(option, "proxy", proxy)
-        self._set_option_value(option, "domain", domain)
+        self._set_option_value(option, "domain", html_domain, containers=("client",))
+        self._set_option_value(option, "postman", api_domain, containers=("client", "network", "plugins"))
+        self._set_option_value(option, "api", api_domain, containers=("client", "network"))
 
         username = account.get("username")
         password = account.get("password")
@@ -357,15 +360,25 @@ class JMComicService:
             return self.pool_service.get_current_bundle()
 
         account = None
-        username = self.config.get("jm_username")
-        password = self.config.get("jm_password")
-        if username and password:
-            account = {"username": username, "password": password}
+        account_pool = self.config.get("account_pool") or []
+        if account_pool:
+            account = account_pool[0]
+
+        html_domains = self.config.get("jm_domain_html") or []
+        api_domains = self.config.get("jm_domain_api") or []
+        proxies = self.config.get("proxy_pool") or []
+
+        domain_bundle = None
+        if html_domains or api_domains:
+            domain_bundle = {
+                "html": html_domains[0] if html_domains else None,
+                "api": api_domains[0] if api_domains else None,
+            }
 
         return {
             "account": account,
-            "domain": self.config.get("domain"),
-            "proxy": self.config.get("proxies"),
+            "domain": domain_bundle,
+            "proxy": proxies[0] if proxies else None,
         }
 
     def _max_attempts(self) -> int:
@@ -373,32 +386,41 @@ class JMComicService:
             return 1
 
         accounts = max(1, len(self.pool_service.account_pool))
-        domains = max(1, len(self.pool_service.domain_pool))
+        html_domains = max(1, len(self.pool_service.domain_html_pool))
+        api_domains = max(1, len(self.pool_service.domain_api_pool))
         proxies = max(1, len(self.pool_service.proxy_pool))
-        return max(1, accounts * domains * proxies)
+        return max(1, accounts * html_domains * api_domains * proxies)
 
     @staticmethod
     def _bundle_identity(bundle: dict[str, Any]) -> tuple:
         account = bundle.get("account") or {}
+        domain_bundle = bundle.get("domain") or {}
         return (
             account.get("username"),
             account.get("password"),
-            bundle.get("domain"),
+            domain_bundle.get("html") if isinstance(domain_bundle, dict) else None,
+            domain_bundle.get("api") if isinstance(domain_bundle, dict) else None,
             bundle.get("proxy"),
         )
 
     @staticmethod
-    def _set_option_value(option: Any, key: str, value: Any) -> None:
+    def _set_option_value(
+        option: Any,
+        key: str,
+        value: Any,
+        containers: tuple[str, ...] = ("client", "network", "plugins", "download"),
+    ) -> None:
         if value in (None, "", {}):
             return
 
-        try:
-            setattr(option, key, value)
-            return
-        except Exception:
-            pass
+        if key != "domain":
+            try:
+                setattr(option, key, value)
+                return
+            except Exception:
+                pass
 
-        for container_name in ("client", "network", "plugins", "download"):
+        for container_name in containers:
             try:
                 container = getattr(option, container_name, None)
             except Exception:
@@ -410,6 +432,12 @@ class JMComicService:
                 return
             except Exception:
                 continue
+
+        if key == "domain":
+            try:
+                setattr(option, key, value)
+            except Exception:
+                pass
 
     def _normalize_search_result(self, keyword: str, page: int, raw: Any) -> SearchResult:
         items: list[SearchAlbumItem] = []

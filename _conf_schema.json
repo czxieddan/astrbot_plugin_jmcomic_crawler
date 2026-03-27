@@ -14,9 +14,14 @@
     "description": "JM 密码池，建议与 jm_usernames 一一对应",
     "default": []
   },
-  "jm_domains": {
+  "jm_domain_html": {
     "type": "list",
-    "description": "JM 域名池",
+    "description": "JM HTML 域名池，例如 18comic.vip",
+    "default": []
+  },
+  "jm_domain_api": {
+    "type": "list",
+    "description": "JM API 域名池，例如 www.jmapiproxyxxx.vip",
     "default": []
   },
   "proxy_pool": {
