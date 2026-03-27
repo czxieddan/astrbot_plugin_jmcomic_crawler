@@ -18,7 +18,6 @@ class JMComicCrawlerPlugin(Star):
         super().__init__(context)
         self.config = config if isinstance(config, dict) else self._read_plugin_config()
         self.app = PluginApplication(self.config, context)
-        self._register_llm_tools()
 
     def _read_plugin_config(self) -> dict:
         for attr in ("config", "plugin_config"):
@@ -35,14 +34,6 @@ class JMComicCrawlerPlugin(Star):
                 except Exception as exc:
                     logger.warning("读取插件配置失败: %s", exc)
         return {}
-
-    def _register_llm_tools(self) -> None:
-        add_llm_tools = getattr(self.context, "add_llm_tools", None)
-        if callable(add_llm_tools):
-            try:
-                add_llm_tools(self)
-            except Exception as exc:
-                logger.warning("注册 JMComic LLM tools 失败: %s", exc)
 
     def get_public_api(self):
         return self.app.public_api_service
