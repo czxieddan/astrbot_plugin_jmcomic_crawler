@@ -160,11 +160,15 @@ class JMComicService:
         page: int,
     ):
         last_error = None
-        main_tag = self.config.get("jm_search_main_tag", "") or ""
-        order_by = self.config.get("jm_search_order_by", "") or ""
-        time_filter = self.config.get("jm_search_time", "") or ""
-        category = self.config.get("jm_search_category", "") or ""
-        sub_category = self.config.get("jm_search_sub_category", "") or ""
+        try:
+            main_tag = int(self.config.get("jm_search_main_tag", 0) or 0)
+        except Exception:
+            main_tag = 0
+        order_by = str(self.config.get("jm_search_order_by", "") or "")
+        time_filter = str(self.config.get("jm_search_time", "") or "")
+        category = str(self.config.get("jm_search_category", "") or "")
+        raw_sub_category = self.config.get("jm_search_sub_category", None)
+        sub_category = None if raw_sub_category in (None, "") else str(raw_sub_category)
 
         for name in fn_candidates:
             fn = getattr(client, name, None)
@@ -216,6 +220,12 @@ class JMComicService:
             for attempt in attempts:
                 try:
                     return attempt()
+                except NotImplementedError as exc:
+                    detail = f"method={name}"
+                    if signature is not None:
+                        detail += f", signature={signature}"
+                    last_error = NotImplementedError(f"{detail}, error={repr(exc)}")
+                    continue
                 except TypeError as exc:
                     detail = f"method={name}"
                     if signature is not None:
