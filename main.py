@@ -38,6 +38,29 @@ class JMComicCrawlerPlugin(Star):
     def get_public_api(self):
         return self.app.public_api_service
 
+    async def handler(
+        self,
+        event: AstrMessageEvent | None = None,
+        message: str = "",
+        goal: str = "",
+        album_id: str = "",
+        chapter_id: str = "",
+        **kwargs,
+    ) -> str:
+        actual_goal = (goal or message or kwargs.get("query") or kwargs.get("text") or "").strip()
+        if not actual_goal:
+            return "请描述你想执行的 JMComic 操作，例如：搜索本子、查看详情、读取评论、总结、推荐或下载。"
+
+        if event is None:
+            return f"已接收 JMComic 请求：{actual_goal}"
+
+        return await self.app.workflow_service.run(
+            event,
+            actual_goal,
+            album_id or None,
+            chapter_id or None,
+        )
+
     @filter.command("jm")
     async def jm_command(self, event: AstrMessageEvent):
         yield event.plain_result(await self.app.command_router.handle(event))
