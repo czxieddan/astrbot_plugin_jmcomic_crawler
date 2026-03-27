@@ -73,6 +73,7 @@ class JMComicService:
                 candidates,
                 keyword=keyword,
                 page=page,
+                jmcomic=self._module,
             ),
         )
 
@@ -158,6 +159,7 @@ class JMComicService:
         fn_candidates: tuple[str, ...],
         keyword: str,
         page: int,
+        jmcomic=None,
     ):
         last_error = None
         try:
@@ -170,7 +172,7 @@ class JMComicService:
         raw_sub_category = self.config.get("jm_search_sub_category", None)
         sub_category = None if raw_sub_category in (None, "") else str(raw_sub_category)
 
-        for target_name, target in self._iter_search_targets(client):
+        for target_name, target in self._iter_search_targets(client, jmcomic):
             for name in fn_candidates:
                 fn = getattr(target, name, None)
                 if not callable(fn):
@@ -244,9 +246,10 @@ class JMComicService:
         raise JMQueryError("未找到可用搜索方法")
 
     @staticmethod
-    def _iter_search_targets(client) -> list[tuple[str, Any]]:
+    def _iter_search_targets(client, jmcomic=None) -> list[tuple[str, Any]]:
         targets: list[tuple[str, Any]] = [("client", client)]
         seen = {id(client)}
+
         for attr_name in (
             "client",
             "html_client",
@@ -265,6 +268,10 @@ class JMComicService:
                 continue
             seen.add(id(target))
             targets.append((attr_name, target))
+
+        if jmcomic is not None and id(jmcomic) not in seen:
+            targets.append(("module", jmcomic))
+
         return targets
 
     @staticmethod
