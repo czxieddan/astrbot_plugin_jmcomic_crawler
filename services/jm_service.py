@@ -170,77 +170,102 @@ class JMComicService:
         raw_sub_category = self.config.get("jm_search_sub_category", None)
         sub_category = None if raw_sub_category in (None, "") else str(raw_sub_category)
 
-        for name in fn_candidates:
-            fn = getattr(client, name, None)
-            if not callable(fn):
-                continue
-
-            try:
-                signature = inspect.signature(fn)
-            except Exception:
-                signature = None
-
-            dynamic_attempt = self._build_search_attempt(
-                fn,
-                signature,
-                keyword,
-                page,
-                main_tag,
-                order_by,
-                time_filter,
-                category,
-                sub_category,
-            )
-            attempts = [dynamic_attempt] if dynamic_attempt is not None else []
-            attempts.extend(
-                [
-                    lambda: fn(keyword, page=page),
-                    lambda: fn(keyword, page),
-                    lambda: fn(
-                        keyword,
-                        page,
-                        main_tag,
-                        order_by,
-                        time_filter,
-                        category,
-                        sub_category,
-                    ),
-                    lambda: fn(
-                        search_query=keyword,
-                        page=page,
-                        main_tag=main_tag,
-                        order_by=order_by,
-                        time=time_filter,
-                        category=category,
-                        sub_category=sub_category,
-                    ),
-                ]
-            )
-
-            for attempt in attempts:
-                try:
-                    return attempt()
-                except NotImplementedError as exc:
-                    detail = f"method={name}"
-                    if signature is not None:
-                        detail += f", signature={signature}"
-                    last_error = NotImplementedError(f"{detail}, error={repr(exc)}")
+        for target_name, target in self._iter_search_targets(client):
+            for name in fn_candidates:
+                fn = getattr(target, name, None)
+                if not callable(fn):
                     continue
-                except TypeError as exc:
-                    detail = f"method={name}"
-                    if signature is not None:
-                        detail += f", signature={signature}"
-                    last_error = TypeError(f"{detail}, error={repr(exc)}")
-                except Exception as exc:
-                    detail = f"method={name}"
-                    if signature is not None:
-                        detail += f", signature={signature}"
-                    last_error = RuntimeError(f"{detail}, error={repr(exc)}")
-                    break
+
+                try:
+                    signature = inspect.signature(fn)
+                except Exception:
+                    signature = None
+
+                dynamic_attempt = self._build_search_attempt(
+                    fn,
+                    signature,
+                    keyword,
+                    page,
+                    main_tag,
+                    order_by,
+                    time_filter,
+                    category,
+                    sub_category,
+                )
+                attempts = [dynamic_attempt] if dynamic_attempt is not None else []
+                attempts.extend(
+                    [
+                        lambda: fn(keyword, page=page),
+                        lambda: fn(keyword, page),
+                        lambda: fn(
+                            keyword,
+                            page,
+                            main_tag,
+                            order_by,
+                            time_filter,
+                            category,
+                            sub_category,
+                        ),
+                        lambda: fn(
+                            search_query=keyword,
+                            page=page,
+                            main_tag=main_tag,
+                            order_by=order_by,
+                            time=time_filter,
+                            category=category,
+                            sub_category=sub_category,
+                        ),
+                    ]
+                )
+
+                for attempt in attempts:
+                    try:
+                        return attempt()
+                    except NotImplementedError as exc:
+                        detail = f"target={target_name}, method={name}"
+                        if signature is not None:
+                            detail += f", signature={signature}"
+                        last_error = NotImplementedError(f"{detail}, error={repr(exc)}")
+                        continue
+                    except TypeError as exc:
+                        detail = f"target={target_name}, method={name}"
+                        if signature is not None:
+                            detail += f", signature={signature}"
+                        last_error = TypeError(f"{detail}, error={repr(exc)}")
+                    except Exception as exc:
+                        detail = f"target={target_name}, method={name}"
+                        if signature is not None:
+                            detail += f", signature={signature}"
+                        last_error = RuntimeError(f"{detail}, error={repr(exc)}")
+                        break
 
         if last_error is not None:
             raise last_error
         raise JMQueryError("未找到可用搜索方法")
+
+    @staticmethod
+    def _iter_search_targets(client) -> list[tuple[str, Any]]:
+        targets: list[tuple[str, Any]] = [("client", client)]
+        seen = {id(client)}
+        for attr_name in (
+            "client",
+            "html_client",
+            "api_client",
+            "search_client",
+            "album_client",
+            "html",
+            "api",
+            "postman",
+        ):
+            try:
+                target = getattr(client, attr_name, None)
+            except Exception:
+                continue
+            if target is None or id(target) in seen:
+                continue
+            seen.add(id(target))
+            targets.append((attr_name, target))
+        return targets
 
     @staticmethod
     def _build_search_attempt(
