@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from astrbot.api import logger
 
-from services.jm_service import JMQueryError
+from .jm_service import JMQueryError
 
 
 class ActionHandler:

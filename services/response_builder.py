@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from models.comment import CommentResult
-from models.dto import AlbumDetail, ChapterDetail, SearchResult
+from ..models.comment import CommentResult
+from ..models.dto import AlbumDetail, ChapterDetail, SearchResult
 
 
 class ResponseBuilder:

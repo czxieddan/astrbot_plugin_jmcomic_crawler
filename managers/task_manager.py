@@ -5,7 +5,7 @@ import uuid
 from pathlib import Path
 from typing import Optional
 
-from models.task import BatchDownloadTask, DownloadTask, now_iso
+from ..models.task import BatchDownloadTask, DownloadTask, now_iso
 
 
 class TaskManager:

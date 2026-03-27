@@ -7,9 +7,9 @@ from typing import Any, Optional
 
 import httpx
 
-from managers.scheduler_manager import SchedulerManager
-from managers.task_manager import TaskManager
-from services.jm_service import JMComicService, JMQueryError
+from ..managers.scheduler_manager import SchedulerManager
+from ..managers.task_manager import TaskManager
+from .jm_service import JMComicService, JMQueryError
 
 
 class DownloadService:

@@ -4,7 +4,7 @@ from astrbot.api import logger
 from astrbot.api.event import AstrMessageEvent, filter
 from astrbot.api.star import Context, Star, register
 
-from services.plugin_application import PluginApplication
+from .services.plugin_application import PluginApplication
 
 
 @register(

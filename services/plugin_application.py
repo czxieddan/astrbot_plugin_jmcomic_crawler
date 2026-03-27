@@ -2,33 +2,33 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from managers.cache_manager import CacheManager
-from managers.config_state_manager import ConfigStateManager
-from managers.memory_manager import MemoryManager
-from managers.scheduler_manager import SchedulerManager
-from managers.task_manager import TaskManager
-from services.action_handler import ActionHandler
-from services.comment_service import CommentService
-from services.command_router import CommandRouter
-from services.config_service import ConfigService
-from services.context_memory_service import ContextMemoryService
-from services.dependency_service import DependencyService
-from services.download_service import DownloadService
-from services.jm_service import JMComicService
-from services.llm_response_service import LLMResponseService
-from services.permission_service import PermissionService
-from services.pool_service import PoolService
-from services.public_api_service import PublicAPIService
-from services.recommend_service import RecommendService
-from services.response_builder import ResponseBuilder
-from services.sentiment_service import SentimentService
-from services.summary_service import SummaryService
-from services.tool_executor import ToolExecutor
-from services.usecases.query_usecase import QueryUseCase
-from services.usecases.recommend_usecase import RecommendUseCase
-from services.usecases.summary_usecase import SummaryUseCase
-from services.usecases.task_usecase import TaskUseCase
-from services.workflow_service import WorkflowService
+from ..managers.cache_manager import CacheManager
+from ..managers.config_state_manager import ConfigStateManager
+from ..managers.memory_manager import MemoryManager
+from ..managers.scheduler_manager import SchedulerManager
+from ..managers.task_manager import TaskManager
+from .action_handler import ActionHandler
+from .comment_service import CommentService
+from .command_router import CommandRouter
+from .config_service import ConfigService
+from .context_memory_service import ContextMemoryService
+from .dependency_service import DependencyService
+from .download_service import DownloadService
+from .jm_service import JMComicService
+from .llm_response_service import LLMResponseService
+from .permission_service import PermissionService
+from .pool_service import PoolService
+from .public_api_service import PublicAPIService
+from .recommend_service import RecommendService
+from .response_builder import ResponseBuilder
+from .sentiment_service import SentimentService
+from .summary_service import SummaryService
+from .tool_executor import ToolExecutor
+from .usecases.query_usecase import QueryUseCase
+from .usecases.recommend_usecase import RecommendUseCase
+from .usecases.summary_usecase import SummaryUseCase
+from .usecases.task_usecase import TaskUseCase
+from .workflow_service import WorkflowService
 
 
 class PluginApplication:

@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 from typing import Any, Iterable, Optional
 
-from models.dto import (
+from ..models.dto import (
     AlbumDetail,
     ChapterDetail,
     ChapterSummary,

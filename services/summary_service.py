@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from collections import Counter
 
-from models.comment import CommentResult
-from models.dto import AlbumDetail, ChapterDetail
+from ..models.comment import CommentResult
+from ..models.dto import AlbumDetail, ChapterDetail
 
 
 class SummaryService:

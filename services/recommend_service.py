@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from models.comment import CommentResult
-from models.dto import AlbumDetail, SearchResult
+from ..models.comment import CommentResult
+from ..models.dto import AlbumDetail, SearchResult
 
 
 class RecommendService:

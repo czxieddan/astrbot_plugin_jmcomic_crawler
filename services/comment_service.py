@@ -3,8 +3,8 @@ from __future__ import annotations
 import asyncio
 from typing import Any
 
-from models.comment import CommentItem, CommentResult
-from services.jm_service import JMComicService, JMQueryError
+from ..models.comment import CommentItem, CommentResult
+from .jm_service import JMComicService, JMQueryError
 
 
 class CommentService:

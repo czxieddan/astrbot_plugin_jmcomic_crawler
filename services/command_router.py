@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from services.jm_service import JMQueryError
+from .jm_service import JMQueryError
 
 
 class CommandRouter:
