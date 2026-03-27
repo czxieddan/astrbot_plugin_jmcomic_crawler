@@ -63,7 +63,7 @@ class JMComicService:
 
     def _search_album_sync(self, keyword: str, page: int) -> SearchResult:
         return self._execute_with_failover(
-            fn_candidates=("search_site", "search_album", "search"),
+            fn_candidates=("search_site", "search_album"),
             invoke_args=(keyword,),
             invoke_kwargs={"page": page},
             normalize=lambda raw: self._normalize_search_result(keyword, page, raw),
@@ -162,6 +162,7 @@ class JMComicService:
         jmcomic=None,
     ):
         last_error = None
+        found_candidate = False
         try:
             main_tag = int(self.config.get("jm_search_main_tag", 0) or 0)
         except Exception:
@@ -177,6 +178,7 @@ class JMComicService:
                 fn = getattr(target, name, None)
                 if not callable(fn):
                     continue
+                found_candidate = True
 
                 try:
                     signature = inspect.signature(fn)
@@ -243,6 +245,8 @@ class JMComicService:
 
         if last_error is not None:
             raise last_error
+        if not found_candidate:
+            raise JMQueryError("当前 jmcomic 版本未暴露可用搜索实现（未找到 search_site/search_album）")
         raise JMQueryError("未找到可用搜索方法")
 
     @staticmethod
